@@ -12,7 +12,4 @@ public class LoginRequest {
         return password;
     }
 
-
-
-    // Getters and setters...
 }

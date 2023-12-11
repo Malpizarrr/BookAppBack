@@ -40,7 +40,7 @@ public class BookController {
     @GetMapping("/{username}/{bookId}")
     public ResponseEntity<Book> getBookById(@PathVariable Long bookId, @PathVariable String username) {
         try {
-            Book book = bookService.getBookById(bookId, username);
+            Book book = bookService.getBookByIdAndUsername(bookId, username);
             return ResponseEntity.ok(book);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -113,17 +113,46 @@ public class BookController {
         }
     }
 
-    @PutMapping("/{bookId}/updatePage/{pageId}")
-    public ResponseEntity<Page> updatePage(@PathVariable Long bookId, @PathVariable Long pageId, @RequestBody Page pageDetails) {
+    @PutMapping("/{bookId}/updatePage/{pageNumber}")
+    public ResponseEntity<Page> updatePage(@PathVariable Long bookId, @PathVariable int pageNumber, @RequestBody Page pageDetails) {
         try {
-            Page updatedPage = bookService.updatePage(bookId, pageId, pageDetails);
+            Page updatedPage = bookService.updatePage(bookId, pageNumber, pageDetails);
             return ResponseEntity.ok(updatedPage);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
+    @GetMapping("/{bookId}/nextPage/{username}")
+    public ResponseEntity<Page> getNextPage(@PathVariable Long bookId, @PathVariable String username) {
+        try {
+            Page nextPage = bookService.getNextPage(bookId, username);
+            return ResponseEntity.ok(nextPage);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 
+    // Obtener la página anterior
+    @GetMapping("/{bookId}/previousPage/{username}")
+    public ResponseEntity<Page> getPreviousPage(@PathVariable Long bookId, @PathVariable String username) {
+        try {
+            Page previousPage = bookService.getPreviousPage(bookId, username);
+            return ResponseEntity.ok(previousPage);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 
-
+    // Obtener una página específica por número
+    @GetMapping("/{bookId}/page/{pageNumber}/{username}")
+    public ResponseEntity<Page> getPageByNumber(@PathVariable Long bookId, @PathVariable int pageNumber, @PathVariable String username) {
+        try {
+            Page page = bookService.getPageByNumber(bookId, pageNumber, username);
+            return ResponseEntity.ok(page);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 }
+

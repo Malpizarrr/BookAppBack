@@ -137,12 +137,12 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public Page updatePage(Long bookId, Long pageId, Page pageDetails) {
+    public Page updatePage(Long bookId, int pageNum, Page pageDetails) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Libro no encontrado"));
 
         Page pageToUpdate = book.getPages().stream()
-                .filter(p -> p.getPageId().equals(pageId))
+                .filter(p -> p.getPageNumber().equals(pageNum))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Página no encontrada"));
 
@@ -153,19 +153,6 @@ public class BookService {
     }
 
 
-    public Book getBookById(Long bookId, String username) {
-        Optional<Book> optionalBook = bookRepository.findById(bookId);
-        if (optionalBook.isPresent()) {
-            Book book = optionalBook.get();
-            if (book.getUser().getUsername().equals(username)) {
-                return book;
-            } else {
-                throw new RuntimeException("No tienes permiso para ver este libro");
-            }
-        } else {
-            throw new RuntimeException("Libro no encontrado");
-        }
-    }
 
     public void deleteBook(Long bookId) {
         Optional<Book> optionalBook = bookRepository.findById(bookId);
@@ -178,5 +165,53 @@ public class BookService {
     }
 
 
+    public Book getBookByIdAndUsername(Long bookId, String username) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Libro no encontrado"));
+        if (!book.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("No tienes permiso para ver este libro");
+        }
+        return book;
+    }
+
+    public Page getNextPage(Long bookId, String username) {
+        Book book = getBookByIdAndUsername(bookId, username);
+        int currentPage = book.getCurrentPage();
+        Optional<Page> nextPage = book.getPages().stream()
+                .filter(page -> page.getPageNumber() == currentPage + 1)
+                .findFirst();
+
+        nextPage.ifPresent(page -> updateCurrentPage(bookId, page.getPageNumber(), username));
+        return nextPage.orElse(null);
+    }
+
+    public Page getPreviousPage(Long bookId, String username) {
+        Book book = getBookByIdAndUsername(bookId, username);
+        int currentPage = book.getCurrentPage();
+        Optional<Page> previousPage = book.getPages().stream()
+                .filter(page -> page.getPageNumber() == currentPage - 1)
+                .findFirst();
+
+        previousPage.ifPresent(page -> updateCurrentPage(bookId, page.getPageNumber(), username));
+        return previousPage.orElse(null);
+    }
+
+    public Page getPageByNumber(Long bookId, int pageNumber, String username) {
+        Book book = getBookByIdAndUsername(bookId, username);
+        Page page = book.getPages().stream()
+                .filter(p -> p.getPageNumber() == pageNumber)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Página no encontrada"));
+
+        updateCurrentPage(bookId, pageNumber, username);
+        return page;
+    }
+
+    // Actualiza la página actual del libro
+    public void updateCurrentPage(Long bookId, int pageNumber, String username) {
+        Book book = getBookByIdAndUsername(bookId, username);
+        book.setCurrentPage(pageNumber);
+        bookRepository.save(book);
+    }
 }
 
