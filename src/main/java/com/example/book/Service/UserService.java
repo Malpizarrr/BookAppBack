@@ -5,8 +5,6 @@ import com.example.book.Model.User;
 import com.example.book.Repositories.UserRepository;
 import com.example.book.Util.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,8 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -24,6 +21,10 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+            "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$"
+    );
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil) {
@@ -36,9 +37,19 @@ public class UserService implements UserDetailsService {
         if (userRepository.findByUsername(newUser.getUsername()).isPresent()) {
             throw new RuntimeException("Username already taken");
         }
+
+        if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already taken");
+        }
+
+        if (!EMAIL_PATTERN.matcher(newUser.getEmail()).matches()) {
+            throw new RuntimeException("Invalid email format");
+        }
+
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         return userRepository.save(newUser);
     }
+
 
     public LoginResponse login(String username, String password) {
         User user = userRepository.findByUsername(username)

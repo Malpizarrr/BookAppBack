@@ -28,10 +28,22 @@ public class BookService {
     private PageRepository pageRepository;
 
     public Book createBook(String username, Book book) {
+        // Encuentra el usuario por su nombre de usuario
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         book.setUser(user);
-        return bookRepository.save(book);
+
+        // Guarda el libro
+        Book savedBook = bookRepository.save(book);
+
+        // Crea una página inicial para el libro
+        Page firstPage = new Page();
+        firstPage.setContent("Contenido inicial de la página");
+        firstPage.setBook(savedBook);
+        firstPage.setCreatedAt(new Date());
+        firstPage.setPageNumber(1);
+        pageRepository.save(firstPage);
+        return savedBook;
     }
 
     public List<Book> getUserBooks(String username) {
@@ -102,20 +114,29 @@ public class BookService {
         return page;
     }
 
-    public Set<Page> deletePage(Long bookId, Long pageId) {
+    public Set<Page> deletePage(Long bookId, int pageNumber) {
         Optional<Book> optionalBook = bookRepository.findById(bookId);
         if (optionalBook.isPresent()) {
             Book book = optionalBook.get();
 
+            // Usando pageNumber en lugar de pageId para la comparación
             Page pageToDelete = book.getPages().stream()
-                    .filter(page -> page.getPageId().equals(pageId))
+                    .filter(page -> page.getPageNumber() == pageNumber)
                     .findFirst()
                     .orElse(null);
 
             if (pageToDelete != null) {
+                int deletedPageNumber = pageToDelete.getPageNumber();
                 book.getPages().remove(pageToDelete);
-
                 pageRepository.delete(pageToDelete);
+
+                // Renumerar y guardar las páginas restantes
+                book.getPages().stream()
+                        .filter(page -> page.getPageNumber() > deletedPageNumber)
+                        .forEach(page -> {
+                            page.setPageNumber(page.getPageNumber() - 1);
+                            pageRepository.save(page); // Guardar cada página actualizada
+                        });
 
                 return book.getPages();
             } else {
@@ -125,6 +146,8 @@ public class BookService {
             throw new RuntimeException("Libro no encontrado");
         }
     }
+
+
 
     public Book updateBook(Long bookId, Book bookDetails) {
         Book book = bookRepository.findById(bookId)

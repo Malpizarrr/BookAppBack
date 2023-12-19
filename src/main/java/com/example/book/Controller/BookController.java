@@ -24,7 +24,9 @@ public class BookController {
             bookService.createBook(username, book);
             return ResponseEntity.ok(null);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+
         }
     }
 
@@ -93,13 +95,15 @@ public class BookController {
 
 
     // Eliminar una página
-    @DeleteMapping("/{bookId}/deletePage/{pageId}")
-    public ResponseEntity<Set<Page>> deletePage(@PathVariable Long bookId, @PathVariable Long pageId) {
+    @DeleteMapping("/{bookId}/deletePage/{pageNumber}")
+    public ResponseEntity<?> deletePage(@PathVariable Long bookId, @PathVariable int pageNumber) {
         try {
-            Set<Page> updatedPages = bookService.deletePage(bookId, pageId);
+            Set<Page> updatedPages = bookService.deletePage(bookId, pageNumber);
             return ResponseEntity.ok(updatedPages);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            // Considera manejar otros tipos de excepciones si es necesario
         }
     }
 
@@ -119,6 +123,7 @@ public class BookController {
             Page updatedPage = bookService.updatePage(bookId, pageNumber, pageDetails);
             return ResponseEntity.ok(updatedPage);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
@@ -146,13 +151,17 @@ public class BookController {
 
     // Obtener una página específica por número
     @GetMapping("/{bookId}/page/{pageNumber}/{username}")
-    public ResponseEntity<Page> getPageByNumber(@PathVariable Long bookId, @PathVariable int pageNumber, @PathVariable String username) {
+    public ResponseEntity<Page> getPageByNumber(@PathVariable Long bookId,
+                                                @PathVariable int pageNumber,
+                                                @PathVariable String username) {
         try {
             Page page = bookService.getPageByNumber(bookId, pageNumber, username);
             return ResponseEntity.ok(page);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+
 }
 
