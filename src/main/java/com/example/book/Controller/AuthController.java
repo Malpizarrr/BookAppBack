@@ -22,7 +22,7 @@ public class AuthController {
             User user = userService.register(newUser);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            e.printStackTrace();  // Agrega esto para más detalles en el log
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -39,7 +39,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-
-
-    // Other endpoints...
 }

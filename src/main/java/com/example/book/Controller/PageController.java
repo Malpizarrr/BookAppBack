@@ -23,8 +23,4 @@ public class PageController {
     public Page getPage(@PathVariable Long pageId) {
         return pageService.getPage(pageId);
     }
-
-
-
-    // Otros endpoints según sea necesario
 }

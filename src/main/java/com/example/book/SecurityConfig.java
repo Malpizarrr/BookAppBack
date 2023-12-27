@@ -34,13 +34,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // Deshabilitar CSRF
                 .csrf(AbstractHttpConfigurer::disable)
-                // Configuración de autorización de solicitudes
                 .authorizeRequests(auth -> auth
                         .requestMatchers("/auth/*", "/error").permitAll()
                         .anyRequest().authenticated())
-                // Agregar filtros personalizados
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -49,12 +46,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:63342", "http://localhost:63343", "http://localhost:3000" )); // Permite el origen específico
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:63342", "http://localhost:63343", "http://localhost:3000", "http://192.168.11.106:3000" ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS", "PUT", "DELETE")); // Métodos permitidos
         configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization")); // Cabeceras permitidas
+        configuration.setAllowCredentials(true); // Permitir credenciales
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Aplica la configuración a todas las rutas
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

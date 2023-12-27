@@ -103,7 +103,6 @@ public class BookController {
         } catch (RuntimeException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-            // Considera manejar otros tipos de excepciones si es necesario
         }
     }
 

@@ -59,8 +59,8 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Invalid password");
         }
 
-        String token = jwtTokenUtil.createToken(username); // Generate JWT token
-        return new LoginResponse(token); // Return it in the response
+        String token = jwtTokenUtil.createToken(username);
+        return new LoginResponse(token);
     }
 
     @Override
@@ -71,7 +71,6 @@ public class UserService implements UserDetailsService {
     }
 
     public User createUser(User newUser) {
-        // Asegúrate de encriptar la contraseña antes de guardar
         return userRepository.save(newUser);
     }
 
@@ -83,11 +82,9 @@ public class UserService implements UserDetailsService {
     public User updateUser(Long userId, User userDetails) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // Update user details here
         user.setUsername(userDetails.getUsername());
         user.setEmail(userDetails.getEmail());
-        // more fields to update
+
 
         return userRepository.save(user);
     }
